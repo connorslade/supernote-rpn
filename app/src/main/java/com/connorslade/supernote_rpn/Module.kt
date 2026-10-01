@@ -36,6 +36,7 @@ class Module(private val reactContext: ReactApplicationContext) :
 
     private fun hide() {
         window?.let { runCatching { windowManager?.removeView(it) } }
+        Supernote.setWritable(true)
         window = null
     }
 
@@ -56,7 +57,17 @@ class Module(private val reactContext: ReactApplicationContext) :
             y = 400
         }
 
-        val root = LinearLayout(ctx).apply {
+        val root = object : LinearLayout(ctx) {
+            override fun dispatchHoverEvent(event: MotionEvent?): Boolean {
+                this@Module.onHoverEvent(event)
+                return super.onHoverEvent(event)
+            }
+
+            override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
+                this@Module.onHoverEvent(event)
+                return super.dispatchTouchEvent(event)
+            }
+        }.apply {
             orientation = LinearLayout.VERTICAL
             background = GradientDrawable().apply {
                 setColor(Color.WHITE)
@@ -93,6 +104,15 @@ class Module(private val reactContext: ReactApplicationContext) :
 
         wm.addView(root, params)
         window = root
+    }
+
+    fun onHoverEvent(event: MotionEvent?) {
+        if (event == null) return
+
+        when (event.action) {
+            MotionEvent.ACTION_HOVER_ENTER, MotionEvent.ACTION_DOWN -> Supernote.setWritable(false)
+            MotionEvent.ACTION_HOVER_EXIT, MotionEvent.ACTION_UP -> Supernote.setWritable(true)
+        }
     }
 
     override fun onHostResume() {}

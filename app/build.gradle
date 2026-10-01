@@ -6,35 +6,35 @@ apply plugin: "com.facebook.react"
 // Common method: Process APK and remove specified so files
 def processCustomApk(String buildType) {
     println "Build type: ${buildType}"
-    
+
     def apkDir = file("${buildDir}/outputs/apk/${buildType}")
     def originalApk = file("${apkDir}/app-${buildType}.apk")
     def customApk = file("${apkDir}/app-${buildType}-custom.apk")
-    
+
     if (!originalApk.exists()) {
         throw new GradleException("Original APK file does not exist: ${originalApk.absolutePath}")
     }
-    
+
     println "Starting to process ${buildType.toUpperCase()} APK: ${originalApk.absolutePath}"
-    
+
     // Create temporary directory
     def tempDir = file("${buildDir}/temp/apk-custom-${buildType}")
     if (tempDir.exists()) {
         delete tempDir
     }
     tempDir.mkdirs()
-    
+
     try {
         // Extract APK
         copy {
             from zipTree(originalApk)
             into tempDir
         }
-        
+
         def libDir = file("${tempDir}/lib")
         if (libDir.exists()) {
             println "Processing lib directory: ${libDir.absolutePath}"
-            
+
             // 1. Delete all architecture directories except arm64-v8a
             libDir.listFiles().each { archDir ->
                 if (archDir.isDirectory() && archDir.name != 'arm64-v8a') {
@@ -42,7 +42,7 @@ def processCustomApk(String buildType) {
                     delete archDir
                 }
             }
-            
+
             // 2. Delete specified so files in arm64-v8a directory
             def arm64Dir = file("${libDir}/arm64-v8a")
             if (arm64Dir.exists()) {
@@ -57,7 +57,7 @@ def processCustomApk(String buildType) {
                     'libnative-imagetranscoder.so',
                     'libreactnative.so'
                 ]
-                
+
                 filesToDelete.each { fileName ->
                     def soFile = file("${arm64Dir}/${fileName}")
                     if (soFile.exists()) {
@@ -67,7 +67,7 @@ def processCustomApk(String buildType) {
                         println "So file does not exist, skipping: ${fileName}"
                     }
                 }
-                
+
                 // Display remaining so files
                 println "Remaining files in arm64-v8a directory:"
                 arm64Dir.listFiles().each { file ->
@@ -81,14 +81,14 @@ def processCustomApk(String buildType) {
         } else {
             println "lib directory does not exist"
         }
-        
+
         // Repackage APK
         ant.zip(destfile: customApk, basedir: tempDir)
-        
+
         println "Custom ${buildType.toUpperCase()} APK generated: ${customApk.absolutePath}"
         println "Original APK size: ${(originalApk.length() / 1024 / 1024).round(2)} MB"
         println "Custom APK size: ${(customApk.length() / 1024 / 1024).round(2)} MB"
-        
+
     } finally {
         // Clean up temporary directory
         delete tempDir
@@ -98,12 +98,12 @@ def processCustomApk(String buildType) {
 // Use Gradle configuration to avoid duplication
 ['Debug', 'Release'].each { variant ->
     def buildType = variant.toLowerCase()
-    
+
     tasks.register("buildCustomApk${variant}") {
         group = 'custom'
         description = "编译 ${variant} APK 并删除指定的 so 库文件"
         dependsOn "assemble${variant}"
-        
+
         doLast {
             processCustomApk(buildType)
         }
@@ -209,6 +209,15 @@ android {
             signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+}
+
+if (rootProject.ext.isLspImport) {
+    androidComponents {
+        finalizeDsl { ext ->
+            ext.buildFeatures.buildConfig = false
+            ext.defaultConfig.buildConfigFields.clear()
         }
     }
 }

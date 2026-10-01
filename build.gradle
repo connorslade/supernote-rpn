@@ -18,4 +18,29 @@ buildscript {
     }
 }
 
+// The Kotlin LSP's Gradle importer eagerly reads BuildConfig's generated source dir,
+// which Gradle rejects before the task has run, failing the whole sync. Disable
+// BuildConfig for LSP imports (detected via the --init-script it passes) or when
+// -PdisableBuildConfig is set. :app does the same in its own build.gradle.
+ext.isLspImport = !gradle.startParameter.initScripts.isEmpty() || hasProperty("disableBuildConfig")
+
+// Must come after isLspImport is defined (app reads it) and before the library hook below
+// (so it runs after the RN plugin's own finalizeDsl hook for libraries).
 apply plugin: "com.facebook.react.rootproject"
+
+// Libraries that apply com.facebook.react themselves get another RN hook enabling
+// BuildConfig, so also register after that plugin is applied (re-running is harmless).
+if (isLspImport) {
+    subprojects { p ->
+        def disableBuildConfig = {
+            p.androidComponents.finalizeDsl { ext ->
+                ext.buildFeatures.buildConfig = false
+                ext.defaultConfig.buildConfigFields.clear()
+            }
+        }
+        p.pluginManager.withPlugin("com.android.library", disableBuildConfig)
+        p.pluginManager.withPlugin("com.facebook.react") {
+            if (p.pluginManager.hasPlugin("com.android.library")) disableBuildConfig()
+        }
+    }
+}

@@ -2,3 +2,5 @@ build
 node_modules
 *packages.txt
 .gradle
+/working
+local.properties
