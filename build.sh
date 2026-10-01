@@ -694,7 +694,7 @@ main() {
     copy_icon_and_update_path "$project_root" "$gen_dir" "$gen_cfg"
 
     local project_react_pkgs
-    project_react_pkgs="$(find_manual_react_packages_from_application "$project_root" || true)"
+    project_react_pkgs="$(find_project_react_packages "$project_root" || true)"
 
     local third_party_native_mods
     third_party_native_mods="$(scan_node_modules_native_code "$project_root" || true)"
