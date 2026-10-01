@@ -1,41 +1,21 @@
-/**
- * Simple Plugin
- *
- * @format
- */
-
 import React from 'react';
 import {
   StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
   Pressable,
 } from 'react-native';
 import { PluginManager } from 'sn-plugin-lib';
 
-/**
- * Plugin View
- * Displays Hello World text in the center of the screen
- */
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const handleClose = () => {
-    PluginManager.closePluginView();
-  };
-
   return (
     <View style={styles.container}>
-      <Pressable style={styles.closeButton} onPress={handleClose}>
-        <Text style={[styles.closeText, {color: isDarkMode ? '#ffffff' : '#000000'}]}>✕</Text>
+      <Pressable style={styles.closeButton} onPress={() => PluginManager.closePluginView()}>
+        <Text style={[styles.closeText]}>✕</Text>
       </Pressable>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={isDarkMode ? '#000000' : '#ffffff'}
-      />
-      <Text style={[styles.helloText, {color: isDarkMode ? '#ffffff' : '#000000'}]}>
+      <StatusBar/>
+      <Text style={[styles.helloText]}>
         Hello World
       </Text>
     </View>

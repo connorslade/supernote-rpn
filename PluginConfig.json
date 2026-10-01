@@ -1,0 +1,10 @@
+{
+  "name": "supernote_rpn",
+  "desc": "",
+  "iconPath": "",
+  "versionName": "0.0.1",
+  "versionCode": "1",
+  "pluginID": "0pochlxvy3j33hbg",
+  "pluginKey": "supernote_rpn",
+  "jsMainPath": "index"
+}
