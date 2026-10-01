@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+ROOT=$(pwd)
+
 # =========================================================
 # Function: write_color_output
 # Purpose: Print colored messages to the terminal
@@ -180,7 +182,7 @@ find_project_react_packages() {
     echo "ReactPackage implementations in project:" > "$result_file"
     FOUND_PACKAGES=""
 
-    local android_dir="$project_root/android"
+    local android_dir="$ROOT/app"
     [[ -d "$android_dir" ]] && find_packages_in_directory "$android_dir" "$result_file"
     local app_android_dir="$project_root/app/android"
     [[ -d "$app_android_dir" ]] && find_packages_in_directory "$app_android_dir" "$result_file"
@@ -255,8 +257,8 @@ find_manual_react_packages_from_application() {
     fi
 
     local dirs=(
-        "$project_root/android/app/src/main/java"
-        "$project_root/android/src/main/java"
+        "$ROOT/app/src/main/java"
+        "$ROOT/src/main/java"
         "$project_root/app/android/src/main/java"
     )
 
@@ -311,7 +313,7 @@ print("\n".join(sorted(results)))'
 get_react_packages_from_autolinking_source() {
     local project_root="$1"
     local exclude_raw="${2:-}"
-    local src_file="$project_root/android/app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java"
+    local src_file="$ROOT/app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java"
 
     [[ ! -f "$src_file" ]] && { write_color_output "Autolinking PackageList.java not found: $src_file" "Yellow"; return; }
 
@@ -431,7 +433,7 @@ PY
 test_has_android_native_code() {
     local project_root="$1"
 
-    for dir in "$project_root/android" "$project_root/app/android"; do
+    for dir in "$ROOT/app" "$project_root/app/android"; do
         if [[ -d "$dir" ]] && find "$dir" -type f \( -name '*.java' -o -name '*.kt' \) -quit 2>/dev/null; then
             return 0
         fi
@@ -451,7 +453,7 @@ test_has_android_native_code() {
         done
     fi
 
-    local javac_dir="$project_root/android/app/build/intermediates/javac"
+    local javac_dir="$ROOT/app/build/intermediates/javac"
     if [[ -d "$javac_dir" ]]; then
         if find "$javac_dir" -type d -regex '.*/compile.*JavaWithJavac/classes' -exec find {} -type f -name '*.class' -quit \; 2>/dev/null; then
             return 0
@@ -488,7 +490,7 @@ build_react_native_bundle() {
     write_color_output "Starting React Native bundling..." "Blue"
     local bundle_output="$output_dir/$project_name.bundle"
     local assets_dir="$output_dir"
-    local cmd="npx react-native bundle --entry-file src/index.js --bundle-output \"$bundle_output\" --platform android --assets-dest \"$assets_dir\" --dev false"
+    local cmd="npx react-native bundle --entry-file index.js --bundle-output \"$bundle_output\" --platform android --assets-dest \"$assets_dir\" --dev false"
     write_color_output "Executing command: $cmd" "Yellow"
     (cd "$project_root" && eval "$cmd") && write_color_output "Bundle generated: $bundle_output" "Green"
 }
@@ -503,7 +505,7 @@ build_android_apk() {
     local project_root="$1"
     local gen_cfg="$2"
 
-    local android_dir="$project_root/android"
+    local android_dir="$ROOT"
     [[ ! -d "$android_dir" ]] && { write_color_output "android directory not found" "Red"; return 1; }
 
     write_color_output "Running gradle task: buildCustomApkDebug..." "Blue"
@@ -533,7 +535,7 @@ copy_apk_and_update_config() {
     local build_generated_dir="$2"
     local build_generated_config_file="$3"
 
-    local apk_search="$project_root/android/app/build/outputs/apk"
+    local apk_search="$ROOT/app/build/outputs/apk"
     local apk_path=""
     if [[ -d "$apk_search" ]]; then
         apk_path="$(find "$apk_search" -type f -name '*custom*.apk' -print -quit 2>/dev/null || true)"
@@ -672,7 +674,7 @@ rename_to_snplg_file() {
 main() {
     test_operating_system
 
-    local project_root="${1:-$(pwd)}"
+    local project_root="${1:-$ROOT/plugin}"
     get_package_info "$project_root"
 
     local gen_dir

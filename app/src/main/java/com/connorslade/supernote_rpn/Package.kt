@@ -1,4 +1,4 @@
-package com.supernote_rpn
+package com.connorslade.supernote_rpn
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule

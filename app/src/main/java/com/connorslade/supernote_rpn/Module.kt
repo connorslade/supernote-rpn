@@ -1,4 +1,4 @@
-package com.supernote_rpn
+package com.connorslade.supernote_rpn
 
 import android.content.Context
 import android.graphics.Color

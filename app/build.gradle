@@ -117,14 +117,11 @@ def processCustomApk(String buildType) {
  */
 react {
     /* Folders */
-    //   The root of your project, i.e. where "package.json" lives. Default is '../..'
-    // root = file("../../")
-    //   The folder where the react-native NPM package is. Default is ../../node_modules/react-native
-    // reactNativeDir = file("../../node_modules/react-native")
-    //   The folder where the react-native Codegen package is. Default is ../../node_modules/@react-native/codegen
-    // codegenDir = file("../../node_modules/@react-native/codegen")
-    //   The cli.js file which is the React Native CLI entrypoint. Default is ../../node_modules/react-native/cli.js
-    // cliFile = file("../../node_modules/react-native/cli.js")
+    //   The JS project lives in plugin/ rather than the default '../..'
+    root = file("../plugin")
+    reactNativeDir = file("../plugin/node_modules/react-native")
+    codegenDir = file("../plugin/node_modules/@react-native/codegen")
+    cliFile = file("../plugin/node_modules/react-native/cli.js")
 
     /* Variants */
     //   The list of variants to that are debuggable. For those we're going to
@@ -186,9 +183,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.supernote_rpn"
+    namespace "com.connorslade.supernote_rpn"
     defaultConfig {
-        applicationId "com.supernote_rpn"
+        applicationId "com.connorslade.supernote_rpn"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

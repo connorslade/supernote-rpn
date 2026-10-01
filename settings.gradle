@@ -1,0 +1,12 @@
+pluginManagement { includeBuild("plugin/node_modules/@react-native/gradle-plugin") }
+plugins { id("com.facebook.react.settings") }
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    ex.autolinkLibrariesFromCommand(
+        ["npx", "@react-native-community/cli", "config"],
+        file("plugin"),
+        files("plugin/package-lock.json", "plugin/package.json", "plugin/react-native.config.js"),
+    )
+}
+rootProject.name = 'supernote_rpn'
+include ':app'
+includeBuild('plugin/node_modules/@react-native/gradle-plugin')
